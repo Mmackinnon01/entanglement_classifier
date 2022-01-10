@@ -19,3 +19,22 @@ class TestNode(unittest.TestCase):
 
     def test_node_creation_without_state(self):
         self.assertTrue((Node().init_quantum_state == spin_down).all(), "Node not initialised in spin down")
+
+    def test_node_creation_in_down_state(self):
+        self.assertTrue((Node(0).init_quantum_state == spin_down).all(), "Node not initialised in spin down")
+
+    def test_node_creation_in_up_state(self):
+        self.assertTrue((Node(1).init_quantum_state == spin_up).all(), "Node not initialised in spin up")
+
+    def test_node_creation_in_random_state(self):
+        self.assertTrue(((Node("random").init_quantum_state == spin_up).all() or (Node("random").init_quantum_state == spin_down).all()), "Node not initialised in spin state")
+
+    def test_node_state_change_to_up(self):
+        node = Node()
+        node.init_quantum_state = 1
+        self.assertTrue((node.init_quantum_state == spin_up).all(), "Node not set to spin up")
+
+    def test_node_state_change_to_down(self):
+        node = Node(1)
+        node.init_quantum_state = 0
+        self.assertTrue((node.init_quantum_state == spin_down).all(), "Node not set to spin down")

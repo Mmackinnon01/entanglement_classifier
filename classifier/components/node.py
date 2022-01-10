@@ -18,6 +18,9 @@ class Node:
 
     @init_quantum_state.setter
     def init_quantum_state(self, quantum_state: int):
+        if quantum_state == "random":
+            quantum_state = round(np.random.rand())
+
         if quantum_state == 0:
             self._init_quantum_state = spin_down
         elif quantum_state == 1:
