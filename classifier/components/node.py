@@ -1,15 +1,13 @@
 import numpy as np
 
 
-spin_up = np.array([[1, 0],
-                    [0, 0]])
-spin_down = np.array([[0, 0],
-                      [0, 1]])
+spin_up = np.array([[1, 0], [0, 0]])
+spin_down = np.array([[0, 0], [0, 1]])
 
 
 class Node:
-
-    def __init__(self, init_quantum_state=0):
+    def __init__(self, node_id, init_quantum_state=0):
+        self.node_id = node_id
         self.init_quantum_state = init_quantum_state
 
     @property
@@ -27,4 +25,3 @@ class Node:
             self._init_quantum_state = spin_up
         else:
             raise ValueError("Invalid quantum state provided")
-
