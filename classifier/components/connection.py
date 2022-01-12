@@ -7,8 +7,14 @@ class Connection:
         self.node2 = node2
         self.function = function
 
-    def calc(self, **kwargs):
-        return self.function(**kwargs)
+    def calc(self, model_state):
+        return self.function.calc(model_state)
+
+    def commutator(self, a, b):
+        return np.matmul(a, b) - np.matmul(b, a)
+
+    def calcWithCommutator(self, model_state):
+        return -1j * self.commutator(self.function.calc(model_state), model_state)
 
 
 class ConnectionFactory:
@@ -16,15 +22,10 @@ class ConnectionFactory:
         self.template_function = template_function
         self.variable_values = variable_values
 
-    def generateSpecificFunction(self):
+    def generateSpecificFunction(self, node1, node2, n_nodes):
         kwargs = self.generateRandomArguments()
 
-        def specific_function(**input_kwargs):
-            for kwarg, value in input_kwargs.items():
-                kwargs[kwarg] = value
-            return self.template_function(**kwargs)
-
-        return specific_function
+        return self.template_function(node1, node2, n_nodes, **kwargs)
 
     def generateRandomArguments(self):
         kwargs = self.variable_values.copy()
@@ -33,9 +34,8 @@ class ConnectionFactory:
                 lower_bound = value[0]
                 upper_bound = value[1]
                 kwargs[kwarg] = np.random.uniform(lower_bound, upper_bound)
-
         return kwargs
 
-    def generateConnection(self, node1, node2):
-        connection_function = self.generateSpecificFunction()
+    def generateConnection(self, node1, node2, n_nodes):
+        connection_function = self.generateSpecificFunction(node1, node2, n_nodes)
         return Connection(node1, node2, connection_function)

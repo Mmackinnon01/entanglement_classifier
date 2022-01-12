@@ -1,10 +1,11 @@
-
-
 class System:
-
     def __init__(self, init_quantum_state, nodes: list, connections: dict):
         self.init_quantum_state = init_quantum_state
         self.nodes = nodes
         self.connections = connections
 
-    
+    def calcDensityDerivative(self, model_state):
+        density_derivative = 0
+        for connection in self.connections.values():
+            density_derivative += connection.calcWithCommutator(model_state)
+        return density_derivative
