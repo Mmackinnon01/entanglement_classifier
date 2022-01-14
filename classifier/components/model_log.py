@@ -14,13 +14,15 @@ class ModelLog:
         self.current_time += self.run_resolution
 
     def evalulateEntry(self, entry):
-        validEigen = np.all([val >= 0 for val in np.linalg.eigvals(entry)])
+        validEigen = np.all(
+            [val >= -1e-10 for val in np.linalg.eigvals(entry)])
         validTrace = round(np.trace(entry), 5) == 1
 
         if not validEigen:
             print(
-                "Warning: entry at t={} has negative eigenvalues".format(
-                    self.current_time
+                "Warning: entry at t={} has negative eigenvalues of {}".format(
+                    round(self.current_time, 5),
+                    [val for val in np.linalg.eigvals(entry) if val <= -1e-15]
                 )
             )
 
@@ -34,7 +36,8 @@ class ModelLog:
     def plot(self):
         plt.style.use("default")
         fig, ax = plt.subplots(figsize=[10, 10])
-        density_matrix_size = self.time_log[list(self.time_log.keys())[0]].shape[0]
+        density_matrix_size = self.time_log[list(
+            self.time_log.keys())[0]].shape[0]
         for i in range(density_matrix_size):
             ax.plot(
                 list(self.time_log.keys()),

@@ -7,5 +7,5 @@ class System:
     def calcDensityDerivative(self, model_state):
         density_derivative = 0
         for connection in self.connections.values():
-            density_derivative += connection.calcWithCommutator(model_state)
+            density_derivative += connection.calc(model_state)
         return density_derivative

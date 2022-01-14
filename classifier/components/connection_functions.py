@@ -8,7 +8,7 @@ def commutator(a, b):
     return np.matmul(a, b) - np.matmul(b, a)
 
 
-class InterfaceFunction:
+class DrivenCascadeFunction:
     def __init__(self, node1, node2, n_nodes, gamma_1, gamma_2):
         self.node1 = node1
         self.node2 = node2
@@ -21,6 +21,7 @@ class InterfaceFunction:
         self.sigma_minus_2 = sigmaMinus(node2, n_nodes)
 
     def calc(self, model_state):
+
         term1 = (self.gamma_1) * (
             2 * multi_dot([self.sigma_minus_1, model_state, self.sigma_plus_1])
             - multi_dot([model_state, self.sigma_plus_1, self.sigma_minus_1])
@@ -31,16 +32,16 @@ class InterfaceFunction:
             - multi_dot([model_state, self.sigma_plus_2, self.sigma_minus_2])
             - multi_dot([self.sigma_plus_2, self.sigma_minus_2, model_state])
         )
-        term3 = -((self.gamma_1 * self.gamma_2) ** 0.5) * commutator(
+        term3 = - ((self.gamma_1 * self.gamma_2) ** 0.5) * commutator(
             self.sigma_plus_2, np.matmul(self.sigma_minus_1, model_state)
         )
-        term4 = -((self.gamma_1 * self.gamma_2) ** 0.5) * commutator(
+        term4 = - ((self.gamma_1 * self.gamma_2) ** 0.5) * commutator(
             np.matmul(model_state, self.sigma_plus_1), self.sigma_minus_2
         )
         return term1 + term2 + term3 + term4
 
 
-class ReservoirFunction:
+class EnergyExchangeFunction:
     def __init__(self, node1, node2, n_nodes, J):
         self.node1 = node1
         self.node2 = node2
