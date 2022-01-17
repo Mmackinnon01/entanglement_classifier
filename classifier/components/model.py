@@ -18,7 +18,7 @@ class Model:
     def setInterfaceConectionFac(self, factory):
         self.interfaceConnectionFac = factory
 
-    def generateReservoir(self, n_nodes, init_quantum_state=0):
+    def generateReservoir(self, n_nodes, init_quantum_state=0, connection_rate=1):
         self.reservoir = Reservoir(self.reservoirConnectionFac)
         self.reservoir.setupNodes(
             n_nodes=n_nodes,
@@ -26,15 +26,15 @@ class Model:
             quantum_state=init_quantum_state,
         )
         self.reservoir.computeInitialQuantumState()
-        self.reservoir.setupConnections()
+        self.reservoir.setupConnections(connection_rate)
 
-    def generateInterface(self):
+    def generateInterface(self, connection_rate=1):
         self.interface = Interface(
             sys_nodes=self.system.nodes,
             res_nodes=self.reservoir.nodes.keys(),
             connectionFactory=self.interfaceConnectionFac,
         )
-        self.interface.setupConnections()
+        self.interface.setupConnections(connection_rate)
 
     def setRunDuration(self, run_duration):
         self.run_duration = run_duration

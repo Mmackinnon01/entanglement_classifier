@@ -1,5 +1,6 @@
 from .node import Node
 from sympy.physics.quantum import TensorProduct
+from random import shuffle
 
 
 class Reservoir:
@@ -15,10 +16,19 @@ class Reservoir:
                 node_id=system_nodes + n, init_quantum_state=quantum_state
             )
 
-    def setupConnections(self):
+    def remove_connections(self, connections, connection_rate):
+        shuffle(connections)
+        count = int(len(connections) * connection_rate)
+        if not count:
+            return []  # edge case, no elements removed
+        return connections[:count]
+
+    def setupConnections(self, connection_rate=1):
         node_id_list = self.nodes.keys()
         node_pairs = [[x, y]
                       for x in node_id_list for y in node_id_list if x < y]
+
+        node_pairs = self.remove_connections(node_pairs, connection_rate)
 
         for node_pair in node_pairs:
             self.setupIndividualConnection(

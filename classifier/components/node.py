@@ -1,8 +1,10 @@
 import numpy as np
 
 
-spin_up = np.array([[1, 0], [0, 0]])
-spin_down = np.array([[0, 0], [0, 1]])
+spin_up = np.array([[1, 0],
+                    [0, 0]])
+spin_down = np.array([[0, 0],
+                      [0, 1]])
 
 
 class Node:
