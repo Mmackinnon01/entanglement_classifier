@@ -1,3 +1,4 @@
+from sympy.physics.quantum import TensorProduct
 import numpy as np
 from numpy.linalg import multi_dot
 
@@ -27,7 +28,7 @@ class DrivenCascadeFunction:
             - multi_dot([model_state, self.sigma_plus_1, self.sigma_minus_1])
             - multi_dot([self.sigma_plus_1, self.sigma_minus_1, model_state])
         )
-        term2 = (self.gamma_2) * (
+        term2 = 0.1 * (self.gamma_2) * (
             2 * multi_dot([self.sigma_minus_2, model_state, self.sigma_plus_2])
             - multi_dot([model_state, self.sigma_plus_2, self.sigma_minus_2])
             - multi_dot([self.sigma_plus_2, self.sigma_minus_2, model_state])
