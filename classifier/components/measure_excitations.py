@@ -13,4 +13,4 @@ def measureAllExcitations(density_matrix):
 
 def measureExcitation(density_matrix, system):
     operator = excitationOperator(system, np.log2(density_matrix.shape[0]))
-    return np.trace(density_matrix * operator)
+    return np.trace(np.matmul(density_matrix, operator))

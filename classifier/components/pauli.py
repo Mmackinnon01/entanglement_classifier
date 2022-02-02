@@ -103,7 +103,7 @@ def excitationOperator(node, n_nodes):
     total_state = 0
     for n in np.arange(n_nodes):
         if n == node:
-            next_operator = sigma_z
+            next_operator = sigma_y
         else:
             next_operator = identity
 
