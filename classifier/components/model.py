@@ -10,7 +10,7 @@ import numpy as np
 
 class Model:
     def __init__(self):
-        pass
+        self.switch_structure_time = 99999
 
     def setSystem(self, system):
         self.system = system
@@ -45,6 +45,9 @@ class Model:
     def setRunResolution(self, run_resolution):
         self.run_timestep = run_resolution
 
+    def setSwitchStructureTime(self, switch_structure_time):
+        self.switch_structure_time = switch_structure_time
+
     def calcIterations(self):
         self.iterations = round(self.run_duration / self.run_timestep)
 
@@ -56,6 +59,7 @@ class Model:
         self.calcExcitationState()
 
     def run(self):
+        self.structure_phase = 0
         self.setupModelLog()
         self.calcIterations()
         self.calcStartingState()
@@ -64,6 +68,11 @@ class Model:
         for step in range(self.iterations):
             self.updateState()
             self.logIteration()
+            if round(self.run_timestep * step, 3) == self.switch_structure_time:
+                self.switchStructure()
+
+    def switchStructure(self):
+        self.structure_phase = 1
 
     def logIteration(self):
         self.modelLog.addLogEntry(self.current_state)
@@ -97,7 +106,10 @@ class Model:
         return density_matrix
 
     def calcDensityDerivative(self, state):
-        system_component = self.system.calcDensityDerivative(state)
-        reservoir_component = self.reservoir.calcDensityDerivative(state)
-        interface_component = self.interface.calcDensityDerivative(state)
+        system_component = self.system.calcDensityDerivative(
+            state, self.structure_phase)
+        reservoir_component = self.reservoir.calcDensityDerivative(
+            state, self.structure_phase)
+        interface_component = self.interface.calcDensityDerivative(
+            state, self.structure_phase)
         return reservoir_component + system_component + interface_component
