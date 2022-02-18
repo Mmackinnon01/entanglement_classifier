@@ -1,6 +1,6 @@
 import numpy as np
 
-from .pauli import excitationOperator
+from .pauli import sigmaX, sigmaXExcitationOperator, sigmaYExcitationOperator, sigmaZExcitationOperator, sigmaXMulti, sigmaYMulti
 
 
 def measureAllExcitations(density_matrix):
@@ -12,5 +12,14 @@ def measureAllExcitations(density_matrix):
 
 
 def measureExcitation(density_matrix, system):
-    operator = excitationOperator(system, np.log2(density_matrix.shape[0]))
+    operator = sigmaZExcitationOperator(
+        system, np.log2(density_matrix.shape[0]))
     return np.trace(np.matmul(density_matrix, operator))
+
+
+def measureTotalExcitations(density_matrix):
+    n_nodes = int(
+        np.log2(density_matrix.shape[0]))
+    x_operator = sigmaXMulti([node for node in range(n_nodes)], n_nodes)
+    y_operator = sigmaYMulti([node for node in range(n_nodes)], n_nodes)
+    return np.trace(np.matmul(density_matrix, x_operator)), np.trace(np.matmul(density_matrix, y_operator))

@@ -3,7 +3,7 @@ from .interface import Interface
 from .model_log import ModelLog
 from .runge_kutta import rungeKutta
 from .partial_trace import partialTrace
-from .measure_excitations import measureAllExcitations
+from .measure_excitations import measureAllExcitations, measureTotalExcitations
 from sympy.physics.quantum import TensorProduct
 import numpy as np
 
@@ -15,29 +15,32 @@ class Model:
     def setSystem(self, system):
         self.system = system
 
-    def setReservoirConnectionFac(self, factory):
-        self.reservoirConnectionFac = factory
+    def setReservoirInteractionFacs(self, dualFactories, singleFactories):
+        self.reservoirDualInteractionFacs = dualFactories
+        self.reservoirSingleInteractionFacs = singleFactories
 
-    def setInterfaceConectionFac(self, factory):
-        self.interfaceConnectionFac = factory
+    def setInterfaceInteractionFacs(self, factories):
+        self.interfaceInteractionFacs = factories
 
-    def generateReservoir(self, n_nodes, init_quantum_state=0, connection_rate=1):
-        self.reservoir = Reservoir(self.reservoirConnectionFac)
+    def generateReservoir(self, n_nodes, init_quantum_state=0, interaction_rate=1):
+        self.reservoir = Reservoir(
+            self.reservoirSingleInteractionFacs, self.reservoirDualInteractionFacs)
         self.reservoir.setupNodes(
             n_nodes=n_nodes,
             system_nodes=len(self.system.nodes),
             quantum_state=init_quantum_state,
         )
         self.reservoir.computeInitialQuantumState()
-        self.reservoir.setupConnections(connection_rate)
+        self.reservoir.setupSingleInteractions()
+        self.reservoir.setupDualInteractions(interaction_rate)
 
-    def generateInterface(self, connection_rate=1):
+    def generateInterface(self, interaction_rate=1):
         self.interface = Interface(
             sys_nodes=self.system.nodes,
             res_nodes=self.reservoir.nodes.keys(),
-            connectionFactory=self.interfaceConnectionFac,
+            interactionFactories=self.interfaceInteractionFacs,
         )
-        self.interface.setupConnections(connection_rate)
+        self.interface.setupInteractions(interaction_rate)
 
     def setRunDuration(self, run_duration):
         self.run_duration = run_duration
@@ -79,6 +82,9 @@ class Model:
         self.modelLog.addTraceLogEntry(self.current_trace_state)
         self.modelLog.addExcitationLogEntry(
             self.current_excitation_expectations)
+        self.modelLog.addTotalExcitationLogEntry(
+            self.current_total_excitation_expectations
+        )
         self.modelLog.moveTimeStep()
 
     def setupModelLog(self):
@@ -93,6 +99,8 @@ class Model:
 
     def calcExcitationState(self):
         self.current_excitation_expectations = measureAllExcitations(
+            self.current_trace_state)
+        self.current_total_excitation_expectations = measureTotalExcitations(
             self.current_trace_state)
 
     def calcTraceState(self):

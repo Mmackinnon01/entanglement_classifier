@@ -99,7 +99,37 @@ def sigmaYMulti(nodes, n_nodes):
     return total_state
 
 
-def excitationOperator(node, n_nodes):
+def sigmaXExcitationOperator(node, n_nodes):
+    total_state = 0
+    for n in np.arange(n_nodes):
+        if n == node:
+            next_operator = sigma_x
+        else:
+            next_operator = identity
+
+        if n == 0:
+            total_state = next_operator
+        else:
+            total_state = TensorProduct(total_state, next_operator)
+    return total_state
+
+
+def sigmaYExcitationOperator(node, n_nodes):
+    total_state = 0
+    for n in np.arange(n_nodes):
+        if n == node:
+            next_operator = sigma_z
+        else:
+            next_operator = identity
+
+        if n == 0:
+            total_state = next_operator
+        else:
+            total_state = TensorProduct(total_state, next_operator)
+    return total_state
+
+
+def sigmaZExcitationOperator(node, n_nodes):
     total_state = 0
     for n in np.arange(n_nodes):
         if n == node:

@@ -4,10 +4,12 @@ from random import shuffle
 
 
 class Reservoir:
-    def __init__(self, connectionFactory):
+    def __init__(self, singleInteractionFactories, dualInteractionFactories):
         self.nodes = {}
-        self.connections = {}
-        self.connectionFactory = connectionFactory
+        self.dualInteractions = {}
+        self.singleInteractions = {}
+        self.singleInteractionFactories = singleInteractionFactories
+        self.dualInteractionFactories = dualInteractionFactories
 
     def setupNodes(self, n_nodes, system_nodes, quantum_state=0):
         self.system_nodes = system_nodes
@@ -16,40 +18,67 @@ class Reservoir:
                 node_id=system_nodes + n, init_quantum_state=quantum_state
             )
 
-    def remove_connections(self, connections, connection_rate):
-        shuffle(connections)
-        count = int(len(connections) * connection_rate)
+    def remove_interactions(self, interactions, interaction_rate):
+        shuffle(interactions)
+        count = int(len(interactions) * interaction_rate)
         if not count:
             return []  # edge case, no elements removed
-        return connections[:count]
+        return interactions[:count]
 
-    def setupConnections(self, connection_rate=1):
+    def setupDualInteractions(self, interaction_rate=1):
         node_id_list = self.nodes.keys()
         node_pairs = [[x, y]
                       for x in node_id_list for y in node_id_list if x < y]
 
-        node_pairs = self.remove_connections(node_pairs, connection_rate)
+        node_pairs = self.remove_interactions(node_pairs, interaction_rate)
 
         for node_pair in node_pairs:
-            self.setupIndividualConnection(
+            self.setupIndividualDualInteraction(
                 node1=node_pair[0], node2=node_pair[1])
 
-    def setupIndividualConnection(self, node1, node2):
-        if type(self.connectionFactory) == list:
-            connection_list = []
-            for factory in self.connectionFactory:
-                connection = self.factory.generateConnection(
-                    node1, node2, n_nodes=self.system_nodes + len(self.nodes)
+    def setupIndividualDualInteraction(self, node1, node2):
+        for i, factory in enumerate(self.dualInteractionFactories):
+            if type(factory) == list:
+                interaction_list = []
+                for fac in factory:
+                    interactino = fac.generateInteraction(
+                        [node1, node2], n_nodes=len(
+                            self.sys_nodes) + len(self.res_nodes)
+                    )
+                    interaction_list.append(interactino)
+                self.dualInteractions["res_interaction_{}_{}{}".format(
+                    i, node1, node2)] = interaction_list
+            else:
+                interaction = factory.generateInteraction(
+                    [node1, node2], n_nodes=self.system_nodes + len(self.nodes)
                 )
-                connection_list.append(connection)
-            self.connections["res_connection_{}{}".format(
-                node1, node2)] = connection_list
-        else:
-            connection = self.connectionFactory.generateConnection(
-                node1, node2, n_nodes=self.system_nodes + len(self.nodes)
-            )
-            self.connections["res_connection_{}{}".format(
-                node1, node2)] = connection
+                self.dualInteractions["res_interaction_{}_{}{}".format(
+                    i, node1, node2)] = interaction
+
+    def setupSingleInteractions(self):
+        node_id_list = self.nodes.keys()
+        for node in node_id_list:
+            self.setupIndividualSingleInteraction(
+                node=node)
+
+    def setupIndividualSingleInteraction(self, node):
+        for i, factory in enumerate(self.singleInteractionFactories):
+            if type(factory) == list:
+                interaction_list = []
+                for fac in factory:
+                    interactino = fac.generateInteraction(
+                        node, n_nodes=len(
+                            self.sys_nodes) + len(self.res_nodes)
+                    )
+                    interaction_list.append(interactino)
+                self.singleInteractions["res_interaction_{}_{}".format(
+                    i, node)] = interaction_list
+            else:
+                interaction = factory.generateInteraction(
+                    node, n_nodes=self.system_nodes + len(self.nodes)
+                )
+                self.singleInteractions["res_interaction_{}_{}".format(
+                    i, node)] = interaction
 
     def computeInitialQuantumState(self):
         total_state = 0
@@ -63,8 +92,13 @@ class Reservoir:
 
     def calcDensityDerivative(self, model_state, structure_phase):
         density_derivative = 0
-        for connection in self.connections.values():
-            if type(connection) == list:
-                connection = connection[structure_phase]
-            density_derivative += connection.calc(model_state)
+        for interaction in self.dualInteractions.values():
+            if type(interaction) == list:
+                interaction = interaction[structure_phase]
+            density_derivative += interaction.calc(model_state)
+
+        for interaction in self.singleInteractions.values():
+            if type(interaction) == list:
+                interaction = interaction[structure_phase]
+            density_derivative += interaction.calc(model_state)
         return density_derivative

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .plots import plotReservoir, plotReservoirAndSystem, plotExcitations
+from .plots import plotReservoir, plotReservoirAndSystem, plotExcitations, plotTotalExcitations
 
 
 class ModelLog:
@@ -9,6 +9,7 @@ class ModelLog:
         self.time_log = {}
         self.partial_time_log = {}
         self.excitation_time_log = {}
+        self.total_excitation_time_log = {}
         self.current_time = 0
         self.run_resolution = run_resolution
 
@@ -22,6 +23,9 @@ class ModelLog:
 
     def addExcitationLogEntry(self, entry):
         self.excitation_time_log[self.current_time] = entry
+
+    def addTotalExcitationLogEntry(self, entry):
+        self.total_excitation_time_log[self.current_time] = entry
 
     def moveTimeStep(self):
         self.current_time += self.run_resolution
@@ -46,11 +50,15 @@ class ModelLog:
                 )
             )
 
-    def plotRes(self):
-        self.res_fig = plotReservoir(self.partial_time_log)
+    def plotRes(self, off_diag=False):
+        self.res_fig = plotReservoir(self.partial_time_log, off_diag)
 
-    def plotResAndSys(self):
-        self.res_sys_fig = plotReservoirAndSystem(self.time_log)
+    def plotResAndSys(self, off_diag=False):
+        self.res_sys_fig = plotReservoirAndSystem(self.time_log, off_diag)
 
     def plotExcite(self):
         self.excitation_fig = plotExcitations(self.excitation_time_log)
+
+    def plotTotalExcite(self):
+        self.total_excitation_fig = plotTotalExcitations(
+            self.total_excitation_time_log)
