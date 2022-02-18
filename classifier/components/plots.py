@@ -112,3 +112,37 @@ def plotTotalExcitations(time_log):
     ax.set_title("Total Excitation Expectation Values for System")
 
     return fig, ax
+
+
+def plotSigmaCombinations(time_log):
+    plt.style.use("default")
+
+    fig, ax = plt.subplots(figsize=[15, 8])
+
+    for operator in list(list(time_log.values())[0].keys()):
+        line = np.real(np.array([expectation[operator]
+                                for expectation in list(time_log.values())]))
+        if line.any():
+            ax.plot(
+                list(time_log.keys()),
+                line,
+                label=operator+"_real",
+                alpha=0.7,
+                linewidth=2,
+            )
+
+    for operator in list(list(time_log.values())[0].keys()):
+        line = np.imag(np.array([expectation[operator]
+                                for expectation in list(time_log.values())]))
+        if line.any():
+            ax.plot(
+                list(time_log.keys()),
+                line,
+                label=operator+"_imag",
+                alpha=0.7,
+                linewidth=2,
+            )
+    fig.legend(loc="lower center", ncol=4)
+    ax.set_title("Total Sigma Combination Expectation Values for System")
+
+    return fig, ax

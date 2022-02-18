@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .plots import plotReservoir, plotReservoirAndSystem, plotExcitations, plotTotalExcitations
+from .plots import plotReservoir, plotReservoirAndSystem, plotExcitations, plotTotalExcitations, plotSigmaCombinations
 
 
 class ModelLog:
@@ -10,6 +10,7 @@ class ModelLog:
         self.partial_time_log = {}
         self.excitation_time_log = {}
         self.total_excitation_time_log = {}
+        self.sigma_combination_time_log = {}
         self.current_time = 0
         self.run_resolution = run_resolution
 
@@ -26,6 +27,9 @@ class ModelLog:
 
     def addTotalExcitationLogEntry(self, entry):
         self.total_excitation_time_log[self.current_time] = entry
+
+    def addSigmaCombinationLogEntry(self, entry):
+        self.sigma_combination_time_log[self.current_time] = entry
 
     def moveTimeStep(self):
         self.current_time += self.run_resolution
@@ -62,3 +66,7 @@ class ModelLog:
     def plotTotalExcite(self):
         self.total_excitation_fig = plotTotalExcitations(
             self.total_excitation_time_log)
+
+    def plotSigmaCombinations(self):
+        self.sigma_combination_fig = plotSigmaCombinations(
+            self.sigma_combination_time_log)

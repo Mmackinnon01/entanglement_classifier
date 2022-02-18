@@ -1,9 +1,11 @@
+from re import S
+from tracemalloc import start
 from .reservoir import Reservoir
 from .interface import Interface
 from .model_log import ModelLog
 from .runge_kutta import rungeKutta
 from .partial_trace import partialTrace
-from .measure_excitations import measureAllExcitations, measureTotalExcitations
+from .measure_excitations import measureAllExcitations, measureTotalExcitations, measureAllSigmaCombinations
 from sympy.physics.quantum import TensorProduct
 import numpy as np
 
@@ -61,7 +63,7 @@ class Model:
         self.calcTraceState()
         self.calcExcitationState()
 
-    def run(self):
+    def run(self, measure=True):
         self.structure_phase = 0
         self.setupModelLog()
         self.calcIterations()
@@ -70,37 +72,44 @@ class Model:
 
         for step in range(self.iterations):
             self.updateState()
-            self.logIteration()
+            self.logIteration(measure)
             if round(self.run_timestep * step, 3) == self.switch_structure_time:
                 self.switchStructure()
 
     def switchStructure(self):
         self.structure_phase = 1
 
-    def logIteration(self):
+    def logIteration(self, measure=True):
         self.modelLog.addLogEntry(self.current_state)
         self.modelLog.addTraceLogEntry(self.current_trace_state)
-        self.modelLog.addExcitationLogEntry(
-            self.current_excitation_expectations)
-        self.modelLog.addTotalExcitationLogEntry(
-            self.current_total_excitation_expectations
-        )
+        if measure:
+            self.modelLog.addExcitationLogEntry(
+                self.current_excitation_expectations)
+            self.modelLog.addTotalExcitationLogEntry(
+                self.current_total_excitation_expectations
+            )
+            self.modelLog.addSigmaCombinationLogEntry(
+                self.current_sigma_combination_expectations
+            )
         self.modelLog.moveTimeStep()
 
     def setupModelLog(self):
         self.modelLog = ModelLog(self.run_timestep)
 
-    def updateState(self):
+    def updateState(self, measure=True):
         self.current_state = rungeKutta(
             self.calcDensityDerivative, self.run_timestep, self.current_state
         )
         self.calcTraceState()
-        self.calcExcitationState()
+        if measure:
+            self.calcExcitationState()
 
     def calcExcitationState(self):
         self.current_excitation_expectations = measureAllExcitations(
             self.current_trace_state)
         self.current_total_excitation_expectations = measureTotalExcitations(
+            self.current_trace_state)
+        self.current_sigma_combination_expectations = measureAllSigmaCombinations(
             self.current_trace_state)
 
     def calcTraceState(self):
@@ -121,3 +130,9 @@ class Model:
         interface_component = self.interface.calcDensityDerivative(
             state, self.structure_phase)
         return reservoir_component + system_component + interface_component
+
+    def transform(self, starting_state):
+        self.system.init_quantum_state = starting_state
+        self.run(measure=False)
+        self.calcExcitationState()
+        return np.real(list(self.current_sigma_combination_expectations.values()))
