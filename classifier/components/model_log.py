@@ -36,7 +36,7 @@ class ModelLog:
 
     def evalulateEntry(self, entry):
         validEigen = np.all(
-            [val >= -1e-4 for val in np.linalg.eigvals(entry)])
+            [val >= -1e-2 for val in np.linalg.eigvals(entry)])
         validTrace = round(np.trace(entry), 5) == 1
 
         if not validEigen:
