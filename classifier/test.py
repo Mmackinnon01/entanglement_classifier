@@ -12,7 +12,7 @@ from components.partial_transpose import partialTranspose
 
 import concurrent
 
-samples = 100000
+samples = 1000000
 
 test_size = 0.5
 x_separable = generateSeparableBatch(int(samples/2), dim=4)
