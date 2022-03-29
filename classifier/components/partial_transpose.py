@@ -1,22 +1,7 @@
 import numpy as np
 
 
-def partialTranspose(state):
-    state_pt = np.zeros((4, 4)).astype(complex)
-    for i in range(2):
-        for j in range(2):
-            for k in range(2):
-                for l in range(2):
-                    old_x = i*2+k
-                    new_x = i*2+l
-                    old_y = j*2+l
-                    new_y = j*2+k
-                    state_pt[new_y][new_x] = state[old_y][old_x]
-
-    return state_pt
-
-
-def generalPartialTranspose(state, system):
+def partialTranspose(state, system):
     state_pt = np.zeros(state.shape).astype(complex)
 
     for i in range(state.shape[0]):
@@ -60,5 +45,3 @@ state = np.array([[1, 2, 3, 4],
                   [5, 6, 7, 8],
                   [9, 10, 11, 12],
                   [13, 14, 15, 16]])
-
-print(generalPartialTranspose(state, 0))

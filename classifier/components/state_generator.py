@@ -2,6 +2,7 @@ import numpy as np
 import math
 from sympy.physics.quantum import TensorProduct
 from components.rotation import generateBipartiteRotation
+from components.unitary_rotation_generator import randomUnitary
 
 
 def dagger(state):
@@ -50,6 +51,14 @@ def generateEntangledState(dim=4):
     return mat
 
 
+def generateGeneralNDimState(dim=2):
+    separable_state = generateSeparableState(dim)
+    unitary = randomUnitary(dim)
+    general_state = np.linalg.multi_dot(
+        [unitary, separable_state, np.transpose(np.conjugate(unitary))])
+    return general_state
+
+
 def generatePureBatch(n_states, dim=2):
     return [generatePureState(dim) for n in range(n_states)]
 
@@ -64,3 +73,7 @@ def generateEntangledBatch(n_states, dim=4):
 
 def generateSeparableBatch(n_states, dim=4):
     return [generateSeparableState(dim) for n in range(n_states)]
+
+
+def generateGeneralBatch(n_states, dim=2):
+    return [generateGeneralNDimState(dim) for n in range(n_states)]
